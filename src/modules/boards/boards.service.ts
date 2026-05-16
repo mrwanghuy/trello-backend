@@ -54,6 +54,14 @@ export class BoardsService {
     throw new ForbiddenException('No access to this board');
   }
 
+  async listByWorkspace(userId: string, workspaceId: string) {
+    await this.assertWorkspaceMember(userId, workspaceId);
+    return this.prisma.board.findMany({
+      where: { workspaceId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async create(userId: string, dto: CreateBoardDto) {
     await this.assertWorkspaceMember(userId, dto.workspaceId);
     return this.prisma.$transaction(async (tx) => {

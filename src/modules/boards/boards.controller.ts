@@ -6,9 +6,10 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BoardsService } from './boards.service';
@@ -30,6 +31,12 @@ export class BoardsController {
   @Post()
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateBoardDto) {
     return this.boards.create(user.id, dto);
+  }
+
+  @Get()
+  @ApiQuery({ name: 'workspaceId', required: true })
+  list(@CurrentUser() user: AuthUser, @Query('workspaceId') workspaceId: string) {
+    return this.boards.listByWorkspace(user.id, workspaceId);
   }
 
   @Get(':id')
