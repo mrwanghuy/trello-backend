@@ -92,6 +92,37 @@ export class CardsService {
     });
   }
 
+  async findOne(userId: string, cardId: string) {
+    const card = await this.prisma.card.findUnique({ where: { id: cardId } });
+    if (!card) {
+      throw new NotFoundException('Card not found');
+    }
+    const list = await this.getListOrThrow(card.listId);
+    await this.assertBoardAccess(userId, list.boardId);
+    return this.prisma.card.findUnique({
+      where: { id: cardId },
+      include: {
+        comments: {
+          orderBy: { createdAt: 'asc' },
+          include: {
+            author: { select: { id: true, name: true, avatarUrl: true } },
+          },
+        },
+        checklists: {
+          include: {
+            items: { orderBy: { position: 'asc' } },
+          },
+        },
+        labels: { include: { label: true } },
+        assignees: {
+          include: {
+            user: { select: { id: true, name: true, avatarUrl: true } },
+          },
+        },
+      },
+    });
+  }
+
   async update(userId: string, id: string, dto: UpdateCardDto) {
     const card = await this.getCardOrThrow(id);
     await this.assertBoardAccess(userId, card.list.boardId);

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   Post,
@@ -31,6 +32,11 @@ export class CardsController {
   @Post()
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateCardDto) {
     return this.cards.create(user.id, dto);
+  }
+
+  @Get(':id')
+  findOne(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.cards.findOne(user.id, id);
   }
 
   @Patch(':id')
